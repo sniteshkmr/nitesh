@@ -361,6 +361,16 @@ str_trim()
 str_replace()
 str_to_lower()
 
+
+
+
+
+#Converting to Factors
+
+for(i in 1:ncol(data_new)){
+ data_new[,i] = as.factor(data_new[,i])
+}
+
 ###############################################################
 
 
