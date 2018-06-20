@@ -1,5 +1,7 @@
 
 ##################################### LOAD THE DATA #################################################
+getwd()
+setwd("C:\\Users\\user\\Documents")
 
 library(data.table)
 
@@ -289,17 +291,35 @@ symnum(cor(telecom[,c(5,18,19)]))
 
 telecom$TotalCharges_sqrt = sqrt(telecom$TotalCharges)
 
+
+telecom$TotalCharges = NULL
+############################## SCALING ###################################################
+
+scale = telecom[,c(5,18,20)]
+
+minmax = function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+norm = data.frame(lapply(scale, minmax))
+
+
+telecom$TotalCharges_sqrt = norm$TotalCharges_sqrt
+telecom$tenure=norm$tenure
+telecom$MonthlyCharges=norm$MonthlyCharges
+
+
 ############################# SPLITTING DATA INTO 70% & 30% #################################
 
 library(caTools)
-set.seed(123)
+set.seed(155)
 split = sample.split(Y = telecom$Churn,SplitRatio = 0.7)
 trainig_data = subset(telecom,split==T)
 test_data = subset(telecom,split==F)
 
 ################################# MODELLING #####################################################
 
-model1 = glm(Churn~.-TotalCharges,data = trainig_data,family = binomial(link =logit))
+model1 = glm(Churn~.-TechSupport-DeviceProtection-tenure-gender-Partner-Dependents-OnlineBackup-PhoneService-OnlineSecurity ,data = trainig_data,family = binomial(link =logit))
 
 summary(model1)
 
@@ -321,11 +341,11 @@ model4 = glm(Churn~.-TotalCharges-gender-tenure-Partner-OnlineSecurity-TechSuppo
 
 summary(model4)
 
-res = predict(model4,newdata = test_data,type ="response")
+res = predict(model1,newdata = test_data,type ="response")
 
 head(res)
 
-test_data$prediction = ifelse(pred>0.3,1,0)
+test_data$prediction = ifelse(res>0.5,1,0)
 
 ####################### creating another data frame ######################################
 
@@ -374,7 +394,7 @@ rocrpred = prediction(res,test_data$Churn)
 
 rocrperf= performance(rocrpred, "tpr","fpr")
 
-plot(rocrperf,colorize = T,print.cutoffs.at=seq(0.1,by=0.1))
+plot(rocrperf,colorize = T,print.cutoffs.at=seq(0.1,by=0.1),text.adj=c(1.2,1.2),avg="threshold",lwd=3,main="ROC-CURVE")
 
 
 ############################# AUC ###########################
@@ -386,3 +406,5 @@ AUC_1
 
 ################################################################################################
 
+
+?write.csv

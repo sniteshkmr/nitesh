@@ -251,7 +251,7 @@ i = which(telecom_company$Dependents==No)
 
 library(dplyr)
 
-data("mtcars")
+mtcars = data("mtcars")
 data("iris")
 
 dim(mtcars)
@@ -376,6 +376,10 @@ for(i in 1:ncol(data_new)){
 
 
 
+### standard normalization function 
+zscore = function(x) { 
+  return ((x - mean(x)) / (sd(x)))
+}
 
 
 
